@@ -1,0 +1,1832 @@
+{
+  "info": {
+    "name": "CollabDocs API",
+    "description": "All 17 CollabDocs endpoints, in the order they run end to end (users -> workspace -> documents -> comments -> tags -> audit logs). Start the server, then run the collection top to bottom. Error cases (400 / 404 / 409) sit next to the request they exercise. The rollback demo needs DJANGO_DEBUG=True.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000/api"
+    },
+    {
+      "key": "user_id",
+      "value": ""
+    },
+    {
+      "key": "user2_id",
+      "value": ""
+    },
+    {
+      "key": "workspace_id",
+      "value": ""
+    },
+    {
+      "key": "document_id",
+      "value": ""
+    },
+    {
+      "key": "comment_id",
+      "value": ""
+    },
+    {
+      "key": "reply_id",
+      "value": ""
+    },
+    {
+      "key": "tag_id",
+      "value": ""
+    },
+    {
+      "key": "today",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "1. Create user",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Asha\",\n  \"last_name\": \"Rao\",\n  \"email\": \"asha@example.com\",\n  \"phone\": \"9876543210\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"user_id\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create second user",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Ravi\",\n  \"last_name\": \"Kumar\",\n  \"email\": \"ravi@example.com\",\n  \"phone\": \"9123456780\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"user2_id\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create user - duplicate email/phone (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Asha\",\n  \"last_name\": \"Rao\",\n  \"email\": \"asha@example.com\",\n  \"phone\": \"9876543210\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create user - invalid email and phone (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"X\",\n  \"last_name\": \"Y\",\n  \"email\": \"not-an-email\",\n  \"phone\": \"abc\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. Get user by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "{{user_id}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get user - unknown ID (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/00000000-0000-0000-0000-000000000000/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "00000000-0000-0000-0000-000000000000"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Workspaces",
+      "item": [
+        {
+          "name": "3. Create workspace (owner auto-added as admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/workspaces/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "workspaces"
+              ]
+            },
+            "description": "Creates the workspace and adds the owner as an admin member in one transaction.atomic() block.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Engineering\",\n  \"owner\": \"{{user_id}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"workspace_id\", pm.response.json().id);",
+                  "pm.test(\"Owner counted as the first member\", () => pm.expect(pm.response.json().member_count).to.eql(1));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create workspace - blank name (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/workspaces/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "workspaces"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"   \",\n  \"owner\": \"{{user_id}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4. Get workspace with member count",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/workspaces/{{workspace_id}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "workspaces",
+                "{{workspace_id}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get workspace - unknown ID (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/workspaces/00000000-0000-0000-0000-000000000000/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "workspaces",
+                "00000000-0000-0000-0000-000000000000"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "5. Add member with a role",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/workspaces/{{workspace_id}}/members/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "workspaces",
+                "{{workspace_id}}",
+                "members"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user\": \"{{user2_id}}\",\n  \"role\": \"editor\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Add member - duplicate (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/workspaces/{{workspace_id}}/members/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "workspaces",
+                "{{workspace_id}}",
+                "members"
+              ]
+            },
+            "description": "Hits the unique_workspace_member constraint; the IntegrityError is turned into 409.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user\": \"{{user2_id}}\",\n  \"role\": \"editor\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Add member - unknown user (404)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/workspaces/{{workspace_id}}/members/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "workspaces",
+                "{{workspace_id}}",
+                "members"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user\": \"00000000-0000-0000-0000-000000000000\",\n  \"role\": \"viewer\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Add member - invalid role (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/workspaces/{{workspace_id}}/members/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "workspaces",
+                "{{workspace_id}}",
+                "members"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user\": \"{{user2_id}}\",\n  \"role\": \"superuser\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "6. List members with roles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/workspaces/{{workspace_id}}/members/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "workspaces",
+                "{{workspace_id}}",
+                "members"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List members - only editors and viewers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/workspaces/{{workspace_id}}/members/?role=editor,viewer",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "workspaces",
+                "{{workspace_id}}",
+                "members"
+              ],
+              "query": [
+                {
+                  "key": "role",
+                  "value": "editor,viewer"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "7. Workspace summary (aggregation)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/workspaces/{{workspace_id}}/summary/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "workspaces",
+                "{{workspace_id}}",
+                "summary"
+              ]
+            },
+            "description": "Document, member and comment totals from one aggregate() query."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Documents",
+      "item": [
+        {
+          "name": "8. Create document + first version",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/documents/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "documents"
+              ]
+            },
+            "description": "Saves the document and DocumentVersion 1 in one transaction; the post_save signal writes the AuditLog.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Roadmap\",\n  \"content\": \"Q4 plans\",\n  \"workspace\": \"{{workspace_id}}\",\n  \"created_by\": \"{{user_id}}\",\n  \"status\": \"draft\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"document_id\", pm.response.json().id);",
+                  "pm.test(\"Version 1 was saved\", () => pm.expect(pm.response.json().version_count).to.eql(1));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create document - rollback demo (simulate_failure)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/documents/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "documents"
+              ]
+            },
+            "description": "Needs DJANGO_DEBUG=True. Fails AFTER the document, its version and its audit log are written. Afterwards GET /documents/ and GET /audit-logs/ show nothing was kept.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Doomed document\",\n  \"content\": \"This must not be saved\",\n  \"workspace\": \"{{workspace_id}}\",\n  \"created_by\": \"{{user_id}}\",\n  \"simulate_failure\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create document - blank title (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/documents/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "documents"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"  \",\n  \"content\": \"x\",\n  \"workspace\": \"{{workspace_id}}\",\n  \"created_by\": \"{{user_id}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "9. Update document (saves a new version)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/documents/{{document_id}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "documents",
+                "{{document_id}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Roadmap\",\n  \"content\": \"Q4 plans, revised\",\n  \"status\": \"published\",\n  \"saved_by\": \"{{user2_id}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Version 2 was saved\", () => pm.expect(pm.response.json().version_count).to.eql(2));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update document - blank content (400)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/documents/{{document_id}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "documents",
+                "{{document_id}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"   \"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update document - unknown ID (404)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/documents/00000000-0000-0000-0000-000000000000/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "documents",
+                "00000000-0000-0000-0000-000000000000"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"x\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get document",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/documents/{{document_id}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "documents",
+                "{{document_id}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "10. List documents",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/documents/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "documents"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List documents - filter by workspace, status and search",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/documents/?workspace={{workspace_id}}&status=published&search=roadmap",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "documents"
+              ],
+              "query": [
+                {
+                  "key": "workspace",
+                  "value": "{{workspace_id}}"
+                },
+                {
+                  "key": "status",
+                  "value": "published"
+                },
+                {
+                  "key": "search",
+                  "value": "roadmap"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List documents - filter by tag",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/documents/?tag=python",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "documents"
+              ],
+              "query": [
+                {
+                  "key": "tag",
+                  "value": "python"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List documents - invalid status (400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/documents/?status=deleted",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "documents"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "deleted"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "11. Document versions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/documents/{{document_id}}/versions/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "documents",
+                "{{document_id}}",
+                "versions"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Versions are in order\", () => { const n = pm.response.json().map(v => v.version_number); pm.expect(n).to.eql([...n].sort((a, b) => a - b)); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "12. Document stats (aggregation)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/documents/{{document_id}}/stats/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "documents",
+                "{{document_id}}",
+                "stats"
+              ]
+            },
+            "description": "Version, comment and contributor counts (contributors = distinct users who saved a version)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "13. Add tags to a document",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/documents/{{document_id}}/tags/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "documents",
+                "{{document_id}}",
+                "tags"
+              ]
+            },
+            "description": "Accepts tag names and/or tag IDs. Unknown tags return 404.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tags\": [\n    \"python\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Make sure the tag exists (a 409 here just means it already does).",
+                  "pm.sendRequest({url: pm.collectionVariables.get(\"base_url\") + \"/tags/\", method: \"POST\",",
+                  "  header: {\"Content-Type\": \"application/json\"},",
+                  "  body: {mode: \"raw\", raw: JSON.stringify({name: \"python\"})}}, () => {});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Add tags - unknown tag (404)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/documents/{{document_id}}/tags/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "documents",
+                "{{document_id}}",
+                "tags"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tags\": [\n    \"no-such-tag\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Comments",
+      "item": [
+        {
+          "name": "14. Add a top-level comment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/comments/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "comments"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"document\": \"{{document_id}}\",\n  \"author\": \"{{user2_id}}\",\n  \"content\": \"Looks good to me.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"comment_id\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "14b. Add a reply",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/comments/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "comments"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"document\": \"{{document_id}}\",\n  \"author\": \"{{user_id}}\",\n  \"content\": \"Thanks!\",\n  \"parent\": \"{{comment_id}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"reply_id\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Add comment - blank content (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/comments/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "comments"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"document\": \"{{document_id}}\",\n  \"author\": \"{{user_id}}\",\n  \"content\": \" \"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "15. List comments for a document (threaded)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/comments/?document={{document_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "comments"
+              ],
+              "query": [
+                {
+                  "key": "document",
+                  "value": "{{document_id}}"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Replies are nested under their parent\", () => pm.expect(pm.response.json()[0].replies.length).to.be.above(0));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List comments - document parameter missing (400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/comments/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "comments"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List comments - unknown document (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/comments/?document=00000000-0000-0000-0000-000000000000",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "comments"
+              ],
+              "query": [
+                {
+                  "key": "document",
+                  "value": "00000000-0000-0000-0000-000000000000"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Tags",
+      "item": [
+        {
+          "name": "16. Create tag",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/tags/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "tags"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"django\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"tag_id\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create tag - duplicate (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/tags/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "tags"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"django\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create tag - blank name (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/tags/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "tags"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \" \"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Audit Logs",
+      "item": [
+        {
+          "name": "17. List audit logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/audit-logs/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "audit-logs"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"The signal logged document changes\", () => pm.expect(pm.response.json().length).to.be.above(0));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Audit logs - filter by actor",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/audit-logs/?actor={{user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "audit-logs"
+              ],
+              "query": [
+                {
+                  "key": "actor",
+                  "value": "{{user_id}}"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Audit logs - filter by date range (today)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/audit-logs/?from={{today}}&to={{today}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "audit-logs"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "{{today}}"
+                },
+                {
+                  "key": "to",
+                  "value": "{{today}}"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"today\", new Date().toISOString().slice(0, 10));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Audit logs - one document's history",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/audit-logs/?object_id={{document_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "audit-logs"
+              ],
+              "query": [
+                {
+                  "key": "object_id",
+                  "value": "{{document_id}}"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"created then updated\", () => pm.expect(pm.response.json().map(l => l.action)).to.eql([\"updated\", \"created\"]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Audit logs - invalid actor (400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/audit-logs/?actor=abc",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "audit-logs"
+              ],
+              "query": [
+                {
+                  "key": "actor",
+                  "value": "abc"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Audit logs - invalid date (400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/audit-logs/?from=yesterday",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "audit-logs"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "yesterday"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

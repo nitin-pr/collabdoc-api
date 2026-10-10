@@ -1,0 +1,30 @@
+# PostgreSQL for local development. Django runs outside Docker (in your venv).
+# Values come from the .env file next to this file (same one Django reads).
+#
+#   docker compose up -d        start the database
+#   docker compose stop         stop it (data kept)
+#   docker compose down -v      delete it and all data (fresh start)
+
+name: collabdocs-app
+
+services:
+  db:
+    image: postgres:16
+    container_name: collabdocs-app-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:?set DB_NAME in .env}
+      POSTGRES_USER: ${DB_USER:?set DB_USER in .env}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+    ports:
+      - "${DB_PORT:-5434}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pgdata:
