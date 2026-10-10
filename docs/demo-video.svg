@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" role="img" aria-labelledby="t d">
+  <title id="t">CollabDocs API demo video</title>
+  <desc id="d">Click to watch the demo walkthrough on Google Drive.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f172a"/>
+      <stop offset="1" stop-color="#1e293b"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="720" rx="28" fill="url(#bg)"/>
+  <rect x="24" y="24" width="1232" height="672" rx="20" fill="none" stroke="#334155" stroke-width="2"/>
+
+  <g font-family="Segoe UI, Helvetica, Arial, sans-serif" fill="#e2e8f0">
+    <text x="640" y="150" text-anchor="middle" font-size="58" font-weight="700" fill="#ffffff">CollabDocs API</text>
+    <text x="640" y="206" text-anchor="middle" font-size="30" fill="#94a3b8">Demo walkthrough</text>
+  </g>
+
+  <circle cx="640" cy="372" r="96" fill="#3b82f6"/>
+  <polygon points="610,320 610,424 700,372" fill="#ffffff"/>
+
+  <g font-family="Segoe UI, Helvetica, Arial, sans-serif" text-anchor="middle">
+    <text x="640" y="534" font-size="30" font-weight="600" fill="#ffffff">Click to watch the video</text>
+    <text x="640" y="580" font-size="22" fill="#94a3b8">Hosted on Google Drive</text>
+    <text x="640" y="650" font-size="20" fill="#64748b">Atomic transactions with rollback  ·  Middleware logs  ·  Aggregations  ·  Audit log signal</text>
+  </g>
+</svg>
