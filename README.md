@@ -117,6 +117,8 @@ python manage.py test
 | 16 | Tags | POST | `/api/tags/` | names are lower-cased and unique, 409 on duplicate |
 | 17 | Audit Logs | GET | `/api/audit-logs/?actor=&from=&to=` | dates as `YYYY-MM-DD` (whole days, `to` inclusive) or ISO 8601 |
 
+**Trailing slash:** every URL works with or without it, so `POST /api/users` and `POST /api/users/` are the same request.
+
 **Document list filters:** `workspace` (id), `status` (one or comma-separated), `tag` (name, one or comma-separated, matches any), `search` (case-insensitive match on title **or** content), `created_by` (id). They combine. Bad values return 400, never 500.
 
 **Error codes:** 400 invalid input, 404 not found, 409 duplicate / conflict. Errors are JSON such as `{"detail": "User is already a member of this workspace."}`.
