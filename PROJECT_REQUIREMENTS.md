@@ -260,7 +260,7 @@ Use **`ModelViewSet`** for standard CRUD, **`@action`** for custom endpoints, ro
 ## 6. Submission (all three required — incomplete = marked down)
 
 ### 6.1 GitHub repository
-- [ ] **Public** repo with full source
+- [x] **Public** repo with full source
 - [x] `.env.example`, pinned `requirements.txt`, all migrations, `README.md`
 - [x] Postman collection `.json` in the repo root
 
@@ -274,7 +274,7 @@ Use **`ModelViewSet`** for standard CRUD, **`@action`** for custom endpoints, ro
 - [ ] Middleware logs appearing in the console
 - [ ] At least one aggregation endpoint (stats or summary)
 - [ ] AuditLog written by the signal after a document update
-- [ ] Uploaded to Loom / Google Drive, link in `README.md`
+- [x] Uploaded to Loom / Google Drive, link in `README.md`
 
 ---
 

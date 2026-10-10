@@ -6,7 +6,7 @@ Built with **Django 5.2**, **Django REST Framework** and **PostgreSQL 16**. API 
 
 - Full requirements and the decisions behind them: [PROJECT_REQUIREMENTS.md](PROJECT_REQUIREMENTS.md)
 - Postman collection (all 17 endpoints): [CollabDocs.postman_collection.json](CollabDocs.postman_collection.json)
-- Demo video: _link to be added after recording_
+- Demo video: [Watch on Google Drive](https://drive.google.com/file/d/1ALeSoOY6BFwCSsu6ZZdMa7DILCEA1H7J/view?usp=sharing)
 
 ---
 
